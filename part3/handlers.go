@@ -36,10 +36,11 @@ func BookShow(w http.ResponseWriter, r *http.Request, params httprouter.Params) 
 	if !ok {
 		// No book with the isdn in the url has been found
 		w.WriteHeader(http.StatusNotFound)
-		response := JsonErrorResponse{Error: &apiError{status: 404, title: "Record Not Found"}}
+		response := JsonErrorResponse{Error: &ApiError{Status: 404, Title: "Record Not Found"}}
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			panic(err)
 		}
+		return
 	}
 	response := JsonResponse{Data: book}
 	if err := json.NewEncoder(w).Encode(response); err != nil {

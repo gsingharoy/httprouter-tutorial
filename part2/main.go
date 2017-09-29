@@ -28,12 +28,12 @@ type JsonResponse struct {
 }
 
 type JsonErrorResponse struct {
-	Error *apiError `json:"error"`
+	Error *ApiError `json:"error"`
 }
 
-type apiError struct {
-	status int16
-	title  string
+type ApiError struct {
+	Status int16  `json:"status"`
+	Title  string `json:"title"`
 }
 
 // A map to store the books with the ISDN as the key
@@ -64,7 +64,7 @@ func BookShow(w http.ResponseWriter, r *http.Request, params httprouter.Params) 
 	if !ok {
 		// No book with the isdn in the url has been found
 		w.WriteHeader(http.StatusNotFound)
-		response := JsonErrorResponse{Error: &apiError{status: 404, title: "Record Not Found"}}
+		response := JsonErrorResponse{Error: &ApiError{Status: 404, Title: "Record Not Found"}}
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			panic(err)
 		}

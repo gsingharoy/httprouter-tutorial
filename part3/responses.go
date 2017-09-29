@@ -7,10 +7,10 @@ type JsonResponse struct {
 }
 
 type JsonErrorResponse struct {
-	Error *apiError `json:"error"`
+	Error *ApiError `json:"error"`
 }
 
-type apiError struct {
-	status int16
-	title  string
+type ApiError struct {
+	Status int16  `json:"status"`
+	Title  string `json:"title"`
 }

@@ -22,13 +22,17 @@ type Book struct {
 }
 
 type JsonResponse struct {
+	// Reserved field to add some meta information to the API response
 	Meta interface{} `json:"meta"`
 	Data interface{} `json:"data"`
 }
 
 // A map to store the books with the ISDN as the key
+// This acts as the storage in lieu of an actual database
 var bookstore = make(map[string]*Book)
 
+// Handler for the books index action
+// GET /books
 func BookIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	books := []*Book{}
 	for _, book := range bookstore {
@@ -46,6 +50,21 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", Index)
 	router.GET("/books", BookIndex)
+
+	// Create a couple of sample Book entries
+	bookstore["123"] = &Book{
+		ISDN:   "123",
+		Title:  "Silence of the Lambs",
+		Author: "Thomas Harris",
+		Pages:  367,
+	}
+
+	bookstore["124"] = &Book{
+		ISDN:   "124",
+		Title:  "To Kill a Mocking Bird",
+		Author: "Harper Lee",
+		Pages:  320,
+	}
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

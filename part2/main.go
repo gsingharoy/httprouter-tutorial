@@ -27,6 +27,15 @@ type JsonResponse struct {
 	Data interface{} `json:"data"`
 }
 
+type JsonErrorResponse struct {
+	Error *apiError `json:"error"`
+}
+
+type apiError struct {
+	status int16
+	title  string
+}
+
 // A map to store the books with the ISDN as the key
 // This acts as the storage in lieu of an actual database
 var bookstore = make(map[string]*Book)
@@ -46,10 +55,30 @@ func BookIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
+// Handler for the books Show action
+// GET /books/:isdn
+func BookShow(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	isdn := params.ByName("isdn")
+	book, ok := bookstore[isdn]
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		response := JsonErrorResponse{Error: &apiError{status: 404, title: "Record Not Found"}}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			panic(err)
+		}
+	}
+	response := JsonResponse{Data: book}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	router := httprouter.New()
 	router.GET("/", Index)
 	router.GET("/books", BookIndex)
+	router.GET("/books/:isdn", BookShow)
 
 	// Create a couple of sample Book entries
 	bookstore["123"] = &Book{

@@ -3,16 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
-	router := httprouter.New()
-	router.GET("/", Index)
-	router.GET("/books", BookIndex)
-	router.GET("/books/:isdn", BookShow)
-
 	// Create a couple of sample Book entries
 	bookstore["123"] = &Book{
 		ISDN:   "123",
@@ -28,5 +21,6 @@ func main() {
 		Pages:  320,
 	}
 
+	router := NewRouter(AllRoutes())
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

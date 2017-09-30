@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -10,6 +12,18 @@ import (
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "Welcome!\n")
+}
+
+// Handler for the books Create action
+// POST /books
+func BookCreate(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	book := &Book{}
+	if err := populateModelFromHandler(w, r, params, book); err != nil {
+		writeErrorResponse(w, http.StatusUnprocessableEntity, "Unprocessible Entity")
+		return
+	}
+	bookstore[book.ISDN] = book
+	writeOKResponse(w, book)
 }
 
 // Handler for the books index action
@@ -51,4 +65,19 @@ func writeErrorResponse(w http.ResponseWriter, errorCode int, errorMsg string) {
 	json.
 		NewEncoder(w).
 		Encode(&JsonErrorResponse{Error: &ApiError{Status: errorCode, Title: errorMsg}})
+}
+
+//Populates a model from the params in the Handler
+func populateModelFromHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params, model interface{}) error {
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		return err
+	}
+	if err := r.Body.Close(); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(body, model); err != nil {
+		return err
+	}
+	return nil
 }

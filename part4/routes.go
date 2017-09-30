@@ -21,6 +21,7 @@ func AllRoutes() Routes {
 		Route{"Index", "GET", "/", Index},
 		Route{"BookIndex", "GET", "/books", BookIndex},
 		Route{"Bookshow", "GET", "/books/:isdn", BookShow},
+		Route{"Bookshow", "POST", "/books", BookCreate},
 	}
 	return routes
 }

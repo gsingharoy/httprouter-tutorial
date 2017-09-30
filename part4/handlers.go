@@ -19,12 +19,7 @@ func BookIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	for _, book := range bookstore {
 		books = append(books, book)
 	}
-	response := &JsonResponse{Data: &books}
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		panic(err)
-	}
+	writeOKResponse(w, books)
 }
 
 // Handler for the books Show action
@@ -32,18 +27,28 @@ func BookIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func BookShow(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	isdn := params.ByName("isdn")
 	book, ok := bookstore[isdn]
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if !ok {
 		// No book with the isdn in the url has been found
-		w.WriteHeader(http.StatusNotFound)
-		response := JsonErrorResponse{Error: &ApiError{Status: 404, Title: "Record Not Found"}}
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			panic(err)
-		}
+		writeErrorResponse(w, http.StatusNotFound, "Record Not Found")
 		return
 	}
-	response := JsonResponse{Data: book}
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		panic(err)
+	writeOKResponse(w, book)
+}
+
+// Writes the response as a standard JSON response with StatusOK
+func writeOKResponse(w http.ResponseWriter, m interface{}) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(&JsonResponse{Data: m}); err != nil {
+		writeErrorResponse(w, http.StatusInternalServerError, "Internal Server Error")
 	}
+}
+
+// Writes the error response as a Standard API JSON response with a response code
+func writeErrorResponse(w http.ResponseWriter, errorCode int, errorMsg string) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(errorCode)
+	json.
+		NewEncoder(w).
+		Encode(&JsonErrorResponse{Error: &ApiError{Status: errorCode, Title: errorMsg}})
 }

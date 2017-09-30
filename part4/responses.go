@@ -11,6 +11,6 @@ type JsonErrorResponse struct {
 }
 
 type ApiError struct {
-	Status int16  `json:"status"`
+	Status int    `json:"status"`
 	Title  string `json:"title"`
 }
